@@ -18,20 +18,23 @@ package test;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Goal which touches a timestamp file.
  *
  * @goal touch
  * 
- * @phase process-sources
+ * @phase install
  */
-public class MyMojo
-    extends AbstractMojo
+public class MyMojo extends AbstractMojo
 {
     /**
      * Location of the file.
@@ -39,10 +42,17 @@ public class MyMojo
      * @required
      */
     private File outputDirectory;
+    /**
+     * @parameter name="testParam" alias="myAlias" implementation="" property="aProperty" default-value="123"
+     * @readonly
+     * @required
+     */
+    private String testParam;
 
     public void execute()
         throws MojoExecutionException
     {
+        getLog().info("Плагин отработал");
         File f = outputDirectory;
 
         if ( !f.exists() )
@@ -57,7 +67,12 @@ public class MyMojo
         {
             w = new FileWriter( touch );
 
-            w.write( "touch.txt" );
+            w.write("testParam= " + testParam+"\n");
+            Map pc = getPluginContext();
+            for(Object entry:pc.entrySet() ){
+                Object key = ((Map.Entry) entry).getKey();
+                w.write("key = " + key+"   value = "+((Map.Entry) entry).getValue()+"\n");
+            }
         }
         catch ( IOException e )
         {
